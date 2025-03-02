@@ -1,0 +1,53 @@
+name: macOS TkinterDnD2 Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test-macos:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref:9a55907e430234bf8ab72ea614f84af9cc89598c
+
+      - name: Install Python 3.13 using pyenv
+        run: |
+          brew update
+          brew install pyenv
+          pyenv install 3.13.0
+          pyenv global 3.13.0
+          echo "PYENV_ROOT=$HOME/.pyenv" >> $GITHUB_ENV
+          echo "$HOME/.pyenv/bin" >> $GITHUB_PATH
+          echo "$HOME/.pyenv/shims" >> $GITHUB_PATH
+          python --version
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      - name: Verify installation
+        run: |
+          python -c "import tkinterdnd2; print('tkinterdnd2 imported successfully')"
+          python -m pip list | grep tkinterdnd2 || echo 'tkinterdnd2 not found!'
+
+      - name: Run TkinterDnD2 test script
+        run: |
+          python -c "
+          from tkinterdnd2 import TkinterDnD
+          import time
+          
+          try:
+              root = TkinterDnD.Tk()
+              root.withdraw()  # Hide window since we don't need to see it
+              print('TkinterDnD window created successfully')
+              time.sleep(2)  # Give some time to ensure no crashes
+              root.destroy()  # Cleanly exit
+              print('Test passed!')
+          except Exception as e:
+              print(f'Test failed: {e}')
+              exit(1)
+          "
