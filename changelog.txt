@@ -1,3 +1,6 @@
+0.4.4
+    - Merged pull request to add 2.9.5. TKDND binaries for MacOS-ARM
+
 0.4.3
     - Improved architecture detection thanks to @rokm
 
