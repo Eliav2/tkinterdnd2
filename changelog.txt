@@ -1,3 +1,6 @@
+0.4.4
+    - Uploaded 2.9.5 macOS-arm binaries
+
 0.4.3
     - Improved architecture detection thanks to @rokm
 
