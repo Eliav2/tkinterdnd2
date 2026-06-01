@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="tkinterdnd2",
-    version="0.4.4",
+    version="0.4.4.1",
     author="petasis\\pmgagne\\eliav2",
     description="TkinterDnD2 is a python wrapper for George Petasis'' tkDnD Tk extension version 2",
     long_description=long_description,
