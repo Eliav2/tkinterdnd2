@@ -293,6 +293,24 @@ class DnDWrapper:
 ####      themselves and all their descendant widgets:             ####
 #######################################################################
 
+def require(tkroot):
+    """Enable tkdnd drag-and-drop on an existing Tk root.
+
+    Use this when your application uses a GUI framework (e.g. PySimpleGUI,
+    CustomTkinter) that manages its own Tk root and you cannot use
+    TkinterDnD.Tk() as the root window.
+
+    Call this after the framework has created and finalised its window::
+
+        window = sg.Window('Title', layout, finalize=True)
+        TkinterDnD.require(window.TKroot)
+
+    After this call, any widget in the process can be registered as a
+    drop target via widget.drop_target_register() and widget.dnd_bind().
+    """
+    return _require(tkroot)
+
+
 class Tk(tkinter.Tk, DnDWrapper):
     '''Creates a new instance of a tkinter.Tk() window; all methods of the
     DnDWrapper class apply to this window and all its descendants.'''

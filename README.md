@@ -4,7 +4,21 @@
 
 This repo was originally forked and edited for the purpose of publishing to pypi so one could simply install this package with  `pip install tkinterdnd2`.
 
-This repository is being maintained to ensure availability of `tkinterdnd2` into the future.
+This repository is being maintained to ensure availability of `tkinterdnd2` into the future, providing Tkinter native drag and drop support for windows, unix and Mac OSX.
+
+
+### What is TkDnD2
+
+[tkDnD2](https://github.com/petasis/tkdnd) is a tcl/Tk extension adding native drag and drop support.
+
+### What this repository is about
+
+This repo package TkinterDnD2 and tkdnd2 into a standard python module.
+
+When the extension is imported in python its location will be automatically added to the Tk search path.
+
+This repository contains the compiled binaries from https://github.com/petasis/tkdnd/releases/tag/tkdnd-release-test-v2.9.4. In order to provide support on ARM, we include built binaries from the now defunct [tkinterdnd2-universal](https://pypi.org/project/tkinterdnd2-universal/#files) which added ARM support.
+
 
 ## Install
 
@@ -34,27 +48,68 @@ root.mainloop()
 
 see any of the [demos](./demos) for usage examples.
 
-# tkinterdnd2
+## Framework Integration
 
-Tkinter native drag and drop support for windows, unix and Mac OSX.
+If you are using a GUI framework that manages its own Tk root window (such as PySimpleGUI or CustomTkinter), you cannot use `TkinterDnD.Tk()` as the root. Instead, call `TkinterDnD.require()` on the framework's existing root after it has been created. This loads tkdnd into the shared Tcl interpreter, making drag-and-drop available to all widgets in the process.
 
-## What is TkinterDnD2
+The following are some simple examples: 
 
-[TkinterDnD2](http://tkinterdnd.sourceforge.net) is a python wrapper for George Petasis' tkDnD Tk extension version 2.
+### PySimpleGUI
 
-It is a domain public project.
+```python
+import PySimpleGUI as sg
+from tkinterdnd2 import TkinterDnD, DND_FILES
 
-## What is TkDnD2
+def on_drop(event):
+    window["-FILE-"].update(event.data)
 
-[tkDnD2](https://github.com/petasis/tkdnd) is a tcl/Tk extension adding native drag and drop support.
+layout = [
+    [sg.Text("Drag & Drop a File Here")],
+    [sg.Input("", key="-FILE-")],
+    [sg.Button("OK"), sg.Button("Cancel")],
+]
 
-## What this repository is about
+window = sg.Window("File Drop", layout, finalize=True)
 
-This repo package TkinterDnD2 and tkdnd2 into a standard python module.
+# Inject DnD into PySimpleGUI's own root — no dummy window needed
+TkinterDnD.require(window.TKroot)
 
-When the extension is imported in python its location will be automatically added to the Tk search path.
+# Register any widget as a drop target
+window["-FILE-"].widget.drop_target_register(DND_FILES)
+window["-FILE-"].widget.dnd_bind("<<Drop>>", on_drop)
 
-This repository contains the compiled binaries from https://github.com/petasis/tkdnd/releases/tag/tkdnd-release-test-v2.9.4. In order to provide support on ARM, we include built binaries from the now defunct [tkinterdnd2-universal](https://pypi.org/project/tkinterdnd2-universal/#files) which added ARM support.
+while True:
+    event, values = window.read()
+    if event in (sg.WIN_CLOSED, "Cancel"):
+        break
+
+window.close()
+```
+
+### CustomTkinter
+
+```python
+import customtkinter as ctk
+from tkinterdnd2 import TkinterDnD, DND_FILES
+
+def on_drop(event):
+    entry.delete(0, "end")
+    entry.insert(0, event.data)
+
+app = ctk.CTk()
+app.title("File Drop")
+
+# Inject DnD into CustomTkinter's root
+TkinterDnD.require(app)
+
+entry = ctk.CTkEntry(app, width=400, placeholder_text="Drag a file here...")
+entry.pack(padx=20, pady=20)
+
+entry.drop_target_register(DND_FILES)
+entry.dnd_bind("<<Drop>>", on_drop)
+
+app.mainloop()
+```
 
 ## pyinstaller
 
