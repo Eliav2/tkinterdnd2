@@ -231,7 +231,7 @@ proc xdnd::normalise_data { type data } {
     STRING - UTF8_STRING - TEXT - COMPOUND_TEXT {return $data}
     text/html {
       if {[catch {
-            ::tkdnd::from_encoding unicode $data
+            ::tkdnd::from_encoding utf-16 $data
            } string]} {
         set string $data
       }
@@ -838,7 +838,7 @@ proc xdnd::_SendData {type offset bytes args} {
       }
       default {
         set format 32
-        binary scan $typed_data c* _dodragdrop_transfer_data
+        binary scan [encoding convertto utf-8 $typed_data] c* _dodragdrop_transfer_data
       }
     }
   }

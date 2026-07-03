@@ -64,7 +64,12 @@ def _require(tkroot):
         else:
             raise RuntimeError('Plaform not supported.')
 
-        module_path = os.path.join(os.path.dirname(__file__), 'tkdnd', tkdnd_platform_rep)
+        tcl_major = int(tkroot.tk.call('info', 'tclversion').split('.')[0])
+        if tcl_major >= 9:
+            tcl9_path = os.path.join(os.path.dirname(__file__), 'tkdnd', tkdnd_platform_rep + '-tcl9')
+            module_path = tcl9_path if os.path.isdir(tcl9_path) else os.path.join(os.path.dirname(__file__), 'tkdnd', tkdnd_platform_rep)
+        else:
+            module_path = os.path.join(os.path.dirname(__file__), 'tkdnd', tkdnd_platform_rep)
         tkroot.tk.call('lappend', 'auto_path', module_path)
         TkdndVersion = tkroot.tk.call('package', 'require', 'tkdnd')
     except tkinter.TclError:
