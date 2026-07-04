@@ -56,7 +56,7 @@ jobs:
 
       - name: Install package (macOS)
         if: runner.os == 'macOS'
-        run: python3 -m pip install -e .
+        run: python3 -m pip install -e . --break-system-packages
 
       - name: Install Xvfb (Linux only)
         if: runner.os == 'Linux'
