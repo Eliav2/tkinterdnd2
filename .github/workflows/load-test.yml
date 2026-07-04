@@ -1,0 +1,60 @@
+name: Load test
+
+on:
+  push:
+  pull_request:
+
+# Linux Tcl 9 is not included: actions/setup-python builds Python against the
+# system Tcl (8.6) on Ubuntu, so Python 3.13 on Linux still links Tcl 8.6.
+# Linux arm64 and Windows arm64/x86 require paid runners and are omitted.
+# macOS arm64 ships only Tcl 9 binaries so only a Tcl 9 / Python 3.13 job runs.
+
+jobs:
+  test:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python-version: "3.12"
+            label: "Linux x64 · Tcl 8 (Python 3.12)"
+
+          - os: windows-latest
+            python-version: "3.12"
+            label: "Windows x64 · Tcl 8 (Python 3.12)"
+
+          - os: windows-latest
+            python-version: "3.13"
+            label: "Windows x64 · Tcl 9 (Python 3.13)"
+
+          - os: macos-13
+            python-version: "3.12"
+            label: "macOS x64 · Tcl 8 (Python 3.12)"
+
+          - os: macos-latest
+            python-version: "3.13"
+            label: "macOS arm64 · Tcl 9 (Python 3.13)"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package
+        run: pip install -e .
+
+      - name: Install Xvfb (Linux only)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update -qq && sudo apt-get install -y xvfb
+
+      - name: Run load tests (Linux — requires virtual display)
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum python -m unittest discover -s tests -v
+
+      - name: Run load tests
+        if: runner.os != 'Linux'
+        run: python -m unittest discover -s tests -v
