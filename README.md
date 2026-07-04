@@ -7,17 +7,11 @@ This repo was originally forked and edited for the purpose of publishing to pypi
 This repository is being maintained to ensure availability of `tkinterdnd2` into the future, providing Tkinter native drag and drop support for windows, unix and Mac OSX.
 
 
-### What is TkDnD2
+### What is TkDnD
 
 [tkDnD2](https://github.com/petasis/tkdnd) is a tcl/Tk extension adding native drag and drop support.
 
-### What this repository is about
-
-This repo package TkinterDnD2 and tkdnd2 into a standard python module.
-
-When the extension is imported in python its location will be automatically added to the Tk search path.
-
-This repository contains the compiled binaries from https://github.com/petasis/tkdnd/releases/tag/tkdnd-release-test-v2.9.4. In order to provide support on ARM, we include built binaries from the now defunct [tkinterdnd2-universal](https://pypi.org/project/tkinterdnd2-universal/#files) which added ARM support.
+This repository contains the compiled binaries from https://github.com/petasis/tkdnd/releases/tag/tkdnd-release-test-v2.9.5 and my own compiled binaries for full Tcl 9 support: https://github.com/Squiblydoo/tkdnd.
 
 
 ## Install

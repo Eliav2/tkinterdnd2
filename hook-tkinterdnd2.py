@@ -13,8 +13,8 @@ from PyInstaller.utils.hooks import collect_data_files, collect_dynamic_libs
 
 s = platform.system()
 p = {
-    'Windows': ({'win-arm64', 'win-x86', 'win-x64' },{'tkdnd_unix.tcl', 'tkdnd_macosx.tcl'}),
-    'Linux': ({'linux-x64', 'linux-arm64'}, {'tkdnd_windows.tcl', 'tkdnd_macosx.tcl'}),
+    'Windows': ({'win-arm64', 'win-x86', 'win-x86-tcl9', 'win-x64', 'win-x64-tcl9'}, {'tkdnd_unix.tcl', 'tkdnd_macosx.tcl'}),
+    'Linux': ({'linux-x64', 'linux-x64-tcl9', 'linux-arm64', 'linux-arm64-tcl9'}, {'tkdnd_windows.tcl', 'tkdnd_macosx.tcl'}),
     'Darwin': ({'osx-x64', 'osx-arm64'}, {'tkdnd_windows.tcl', 'tkdnd_unix.tcl'}),
 }
 if s in p:
