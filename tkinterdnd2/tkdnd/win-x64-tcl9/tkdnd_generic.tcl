@@ -521,6 +521,54 @@ proc generic::GetDropTargetCommonTypes { } {
 };# generic::GetDropTargetCommonTypes
 
 # ----------------------------------------------------------------------------
+#  Command generic::GetDropState / generic::RestoreDropState
+#
+#  Snapshot & restore the in-flight drop state (the subset of variables that
+#  HandleLeave resets). Used by platform layers to survive a spurious
+#  <<Leave>> that gets processed while waiting on a blocking data fetch
+#  during a drop (e.g. the XWayland race in issue #77).
+# ----------------------------------------------------------------------------
+proc generic::GetDropState { } {
+  variable _types
+  variable _typelist
+  variable _actionlist
+  variable _action
+  variable _common_drag_source_types
+  variable _common_drop_target_types
+  variable _drag_source
+  variable _drop_target
+  return [dict create \
+    types                    $_types \
+    typelist                 $_typelist \
+    actionlist               $_actionlist \
+    action                   $_action \
+    common_drag_source_types $_common_drag_source_types \
+    common_drop_target_types $_common_drop_target_types \
+    drag_source              $_drag_source \
+    drop_target              $_drop_target \
+  ]
+};# generic::GetDropState
+
+proc generic::RestoreDropState { state } {
+  variable _types
+  variable _typelist
+  variable _actionlist
+  variable _action
+  variable _common_drag_source_types
+  variable _common_drop_target_types
+  variable _drag_source
+  variable _drop_target
+  set _types                    [dict get $state types]
+  set _typelist                 [dict get $state typelist]
+  set _actionlist               [dict get $state actionlist]
+  set _action                   [dict get $state action]
+  set _common_drag_source_types [dict get $state common_drag_source_types]
+  set _common_drop_target_types [dict get $state common_drop_target_types]
+  set _drag_source              [dict get $state drag_source]
+  set _drop_target              [dict get $state drop_target]
+};# generic::RestoreDropState
+
+# ----------------------------------------------------------------------------
 #  Command generic::platform_specific_types
 # ----------------------------------------------------------------------------
 proc generic::platform_specific_types { types } {
