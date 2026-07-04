@@ -46,9 +46,7 @@ jobs:
 
       - name: Install Homebrew Python 3.13 with Tcl 9 (macOS)
         if: runner.os == 'macOS'
-        run: |
-          brew install python@3.13
-          echo "/opt/homebrew/opt/python@3.13/bin" >> $GITHUB_PATH
+        run: brew install python-tk@3.13
 
       - name: Install package
         if: runner.os != 'macOS'
@@ -56,7 +54,7 @@ jobs:
 
       - name: Install package (macOS)
         if: runner.os == 'macOS'
-        run: python3 -m pip install -e . --break-system-packages
+        run: python3.13 -m pip install -e . --break-system-packages
 
       - name: Install Xvfb (Linux only)
         if: runner.os == 'Linux'
@@ -68,7 +66,7 @@ jobs:
 
       - name: Run load tests (macOS)
         if: runner.os == 'macOS'
-        run: python3 -m unittest discover -s tests -v
+        run: python3.13 -m unittest discover -s tests -v
 
       - name: Run load tests (Windows)
         if: runner.os == 'Windows'
