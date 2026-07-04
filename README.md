@@ -30,15 +30,22 @@ root = TkinterDnD.Tk()  # notice - use this instead of tk.Tk()
 lb = tk.Listbox(root)
 lb.insert(1, "drag files to here")
 
+def on_drop(event):
+    # event.data is a raw Tcl list string, not a Python list - see note below
+    for path in root.tk.splitlist(event.data):
+        lb.insert(tk.END, path)
+
 # register the listbox as a drop target
 lb.drop_target_register(DND_FILES)
-lb.dnd_bind('<<Drop>>', lambda e: lb.insert(tk.END, e.data))
+lb.dnd_bind('<<Drop>>', on_drop)
 
 lb.pack()
 root.mainloop()
 ```
 ![tkinterdnd2 example usage](https://i.stack.imgur.com/jnOWd.png)
 
+> [!NOTE]
+> `event.data` is a raw Tcl list, not a Python list or plain string. When multiple files are dropped, their paths come back space-separated in a single string, and any path containing a space is wrapped in `{braces}` so it can still be told apart from the others. Use `root.tk.splitlist(event.data)` (as above) to get a clean Python list of paths — don't split the string yourself, since that will break on braced/spaced paths.
 
 see any of the [demos](./demos) for usage examples.
 
@@ -55,7 +62,9 @@ import PySimpleGUI as sg
 from tkinterdnd2 import TkinterDnD, DND_FILES
 
 def on_drop(event):
-    window["-FILE-"].update(event.data)
+    # event.data is a raw Tcl list; use splitlist to handle multiple/spaced paths, see note above
+    files = window.TKroot.tk.splitlist(event.data)
+    window["-FILE-"].update(files[0])
 
 layout = [
     [sg.Text("Drag & Drop a File Here")],
@@ -87,8 +96,10 @@ import customtkinter as ctk
 from tkinterdnd2 import TkinterDnD, DND_FILES
 
 def on_drop(event):
+    # event.data is a raw Tcl list; use splitlist to handle multiple/spaced paths, see note above
+    files = app.tk.splitlist(event.data)
     entry.delete(0, "end")
-    entry.insert(0, event.data)
+    entry.insert(0, files[0])
 
 app = ctk.CTk()
 app.title("File Drop")
