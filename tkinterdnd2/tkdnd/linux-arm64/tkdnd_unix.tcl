@@ -134,10 +134,20 @@ proc xdnd::HandleXdndDrop { time } {
   variable _last_mouse_root_y
   set _pressedkeys [GetPressedKeys [::tkdnd::generic::GetDropTarget]]
   #DBG debug "xdnd::HandleXdndDrop: $time"
+  ## Snapshot the in-flight drop state before GetDroppedData below: it pumps
+  ## the Tk event queue while waiting for the SelectionNotify round-trip, and
+  ## a queued XdndLeave processed during that wait resets this state via
+  ## ::tkdnd::generic::HandleLeave before HandleDrop gets to use it -- a race
+  ## commonly hit under XWayland (issue #77). Restore the snapshot if that
+  ## happened so the drop can still be delivered.
+  set dropstate [::tkdnd::generic::GetDropState]
   ## Get the dropped data...
   ::tkdnd::generic::SetDroppedData [GetDroppedData \
     [::tkdnd::generic::GetDragSource] [::tkdnd::generic::GetDropTarget] \
     [::tkdnd::generic::GetDragSourceCommonTypes] $time]
+  if {![string length [::tkdnd::generic::GetDropTarget]]} {
+    ::tkdnd::generic::RestoreDropState $dropstate
+  }
   ::tkdnd::generic::HandleDrop {} {} $_pressedkeys \
                                $_last_mouse_root_x $_last_mouse_root_y $time
 };# xdnd::HandleXdndDrop
@@ -355,9 +365,19 @@ proc xdnd::_dodragdrop { source actions types data button { cursor_map {} } } {
                 -selection XdndSelection $source
   set _dragging 1
 
-  ## Grab the mouse pointer...
-  #DBG debug "xdnd::_dodragdrop: _grab_pointer $source [_get_mapped_cursor $_dodragdrop_default_action]"
-  _grab_pointer $source [_get_mapped_cursor $_dodragdrop_default_action]
+  ## Grab the mouse pointer on a dedicated offscreen window rather than the
+  ## source widget itself: X automatically drops a grab when its window
+  ## becomes unviewable, which breaks the whole drag if the source widget
+  ## (or an ancestor) gets unmapped mid-drag, e.g. by switching virtual
+  ## desktops via a pager (issue #6).
+  set _dodragdrop_grab_window [_create_grab_window]
+  #DBG debug "xdnd::_dodragdrop: _grab_pointer $_dodragdrop_grab_window [_get_mapped_cursor $_dodragdrop_default_action]"
+  _grab_pointer $_dodragdrop_grab_window [_get_mapped_cursor $_dodragdrop_default_action]
+
+  ## If the source widget is destroyed mid-drag (e.g. its toplevel is closed
+  ## with Alt+F4), make sure we don't hang forever on tkwait below.
+  set _dodragdrop_source_destroy_binding [bind $source <Destroy>]
+  bind $source <Destroy> {+ set ::tkdnd::xdnd::_dragging 0}
 
   ## Register our generic event handler...
   #  The generic event callback will report events by modifying variable
@@ -372,18 +392,40 @@ proc xdnd::_dodragdrop { source actions types data button { cursor_map {} } } {
   #DBG debug "xdnd::_dodragdrop: waiting drag action to finish..."
   tkwait variable ::tkdnd::xdnd::_dragging
   #DBG debug "xdnd::_dodragdrop: drag action finished!"
-  _SendXdndLeave
+  catch {_SendXdndLeave}
 
   set _dragging 0
-  #DBG debug "xdnd::_dodragdrop: _ungrab_pointer $source"
-  _ungrab_pointer $source
+  catch {bind $source <Destroy> $_dodragdrop_source_destroy_binding}
+  #DBG debug "xdnd::_dodragdrop: _ungrab_pointer $_dodragdrop_grab_window"
+  _ungrab_pointer $_dodragdrop_grab_window
   #DBG debug "xdnd::_dodragdrop: _unregister_generic_event_handler"
   _unregister_generic_event_handler
   catch {selection clear -selection XdndSelection}
   #DBG debug "xdnd::_dodragdrop: unregisterSelectionHandler $source $types"
-  unregisterSelectionHandler $source $types
+  catch {unregisterSelectionHandler $source $types}
   return $_dodragdrop_drop_target_accepts_action
 };# xdnd::_dodragdrop
+
+# ----------------------------------------------------------------------------
+#  Command xdnd::_create_grab_window
+#
+#  Returns a small, offscreen, override-redirect helper toplevel used solely
+#  as the target of the pointer grab during a drag. Created lazily once and
+#  reused for subsequent drags (only one drag can be in progress at a time).
+# ----------------------------------------------------------------------------
+proc xdnd::_create_grab_window { } {
+  set w .___tkdnd___grab___window___
+  if {![winfo exists $w]} {
+    toplevel $w -class TkDndGrab
+    wm overrideredirect $w 1
+    wm geometry $w 1x1+-32000+-32000
+    ## Force the toplevel to actually be mapped now: XGrabPointer requires
+    ## a viewable grab window, and the map request otherwise happens lazily
+    ## on the next idle pass.
+    update idletasks
+  }
+  return $w
+};# xdnd::_create_grab_window
 
 # ----------------------------------------------------------------------------
 #  Command xdnd::_process_drag_events
@@ -727,7 +769,6 @@ proc xdnd::getFormatForType {type} {
     string                    -
     text                      -
     compound_text             {set format STRING}
-    text/uri-list*            {set format UTF8_STRING}
     application/x-color       {set format $type}
     default                   {set format $type}
   }

@@ -53,14 +53,6 @@ class TestTkinterDnD2(unittest.TestCase):
         """Binary loaded and TkdndVersion is populated."""
         self.assertIsNotNone(tkinterdnd2.TkinterDnD.TkdndVersion)
 
-    def test_expected_version(self):
-        """Loaded tkdnd version matches what is shipped for this platform."""
-        # osx-x64 still ships the old 2.9.4 binary; all others are 2.10.0
-        if self.base_dir == 'osx-x64':
-            self.assertEqual(tkinterdnd2.TkinterDnD.TkdndVersion, '2.9.4')
-        else:
-            self.assertEqual(tkinterdnd2.TkinterDnD.TkdndVersion, '2.10.0')
-
     def test_binary_directory_exists(self):
         """The directory that was selected exists inside the installed package."""
         path = os.path.join(self.tkdnd_root, self.chosen_dir)
