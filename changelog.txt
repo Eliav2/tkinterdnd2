@@ -1,3 +1,9 @@
+0.6.2
+    - Rebuilt the Linux binaries (linux-x64(-tcl9) and linux-arm64(-tcl9)) from
+      TkDND 2.10.1 to pick up a fix for a race condition in the X11
+      GetWindowProperty call during XDND drops. Other platforms are
+      unaffected, since the fix only touches the X11/XDND backend.
+
 0.6.1
     - Updated TkDND binaries to 2.10.1 for linux-x64(-tcl9), linux-arm64(-tcl9),
       win-x64(-tcl9), win-x86(-tcl9), win-arm64, and osx-arm64. This brings in
