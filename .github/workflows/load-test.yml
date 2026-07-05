@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 # Coverage notes:
 # - Linux Tcl 9: not testable — actions/setup-python links against system Tcl 8.6
 #   regardless of Python version; paid runners would be needed for Linux arm64.
