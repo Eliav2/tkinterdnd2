@@ -53,10 +53,10 @@ namespace eval ::tkdnd {
 
 }; # namespace ::tkdnd
 
-package ifneeded tkdnd 2.10.2 \
+package ifneeded tkdnd 2.10.3 \
   "tkdnd::source \{$dir/tkdnd.tcl\} ; \
-   tkdnd::initialise \{$dir\} libtkdnd2.10.2.so tkdnd"
+   tkdnd::initialise \{$dir\} libtkdnd2.10.3.so tkdnd"
 
-package ifneeded tkdnd::utils 2.10.2 \
+package ifneeded tkdnd::utils 2.10.3 \
   "tkdnd::source \{$dir/tkdnd_utils.tcl\} ; \
-   package provide tkdnd::utils 2.10.2"
+   package provide tkdnd::utils 2.10.3"

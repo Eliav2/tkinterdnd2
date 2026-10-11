@@ -1,3 +1,16 @@
+0.6.4
+    - Updated TkDND binaries to 2.10.3 for linux-x64(-tcl9),
+      linux-arm64(-tcl9), win-x64(-tcl9), win-x86(-tcl9), win-arm64, and
+      osx-arm64(-tcl9). On Linux/X11, the first file drop onto a target
+      could be silently rejected, and the next drop would then deliver
+      the previous drag's file instead of the one being dropped, so every
+      other drop failed and the rest were one drag behind. TkDND was
+      mistaking an unrelated pointer event (sent when the mouse button is
+      released over the target) for the drag source's reply, abandoning
+      the data request before the reply arrived; the late reply was then
+      picked up by the next drop. Only the X11 backend changed. Fixes
+      issue #23.
+
 0.6.3
     - Fixed drag-over stalls (sometimes lasting several seconds to a
       minute) while dragging files/text over a drop target on Linux/X11,
