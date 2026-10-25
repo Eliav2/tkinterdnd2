@@ -11,7 +11,7 @@ This repository is being maintained to ensure availability of `tkinterdnd2` into
 
 [tkDnD2](https://github.com/petasis/tkdnd) is a tcl/Tk extension adding native drag and drop support.
 
-This repository contains the compiled binaries from https://github.com/petasis/tkdnd/releases/tag/tkdnd-release-test-v2.9.5 and my own compiled binaries for full Tcl 9 support: https://github.com/Squiblydoo/tkdnd.
+This repository contains the compiled binaries from https://github.com/petasis/tkdnd/releases/tag/tkdnd-release-test-v2.9.5 and my own compiled binaries for full Tcl 9 support: https://github.com/Squiblydoo/tkdnd. Tcl 9 binaries are not available for Intel Macs (osx-x64).
 
 
 ## Install
@@ -118,6 +118,12 @@ app.mainloop()
 
 ## pyinstaller
 
-When using `pyinstaller`, you should use the hook-tkinterdnd2.py file included to collect the TkDnD binaries and build them into the project. To use it, copy it into the base directory of your project, then run pyinstaller as follows:
+tkinterdnd2 includes a PyInstaller hook that collects the TkDnD binaries and builds them into the project. PyInstaller finds it automatically, so no extra options are needed:
+
+    pyinstaller -F -w myproject/myproject.py
+
+The hook only bundles the TkDnD binaries for the OS, CPU and Tcl/Tk version of the Python doing the build. On macOS it bundles both the Intel and Apple Silicon binaries, so `--target-arch universal2` builds work.
+
+To use a modified copy of the hook instead, copy `tkinterdnd2/__pyinstaller/hook-tkinterdnd2.py` into the base directory of your project, then run pyinstaller as follows:
 
     pyinstaller -F -w myproject/myproject.py --additional-hooks-dir=.
