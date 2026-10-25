@@ -1,3 +1,17 @@
+0.7.0
+    - The PyInstaller hook is now included in the package and found by
+      PyInstaller automatically, so --additional-hooks-dir is no longer
+      needed. The hook moved to tkinterdnd2/__pyinstaller/hook-tkinterdnd2.py.
+    - The PyInstaller hook now bundles the Tcl 9 binaries when building with
+      Tcl/Tk 9. Previously osx-arm64-tcl9 was left out, so Tcl 9 builds on
+      Apple Silicon failed with "Unable to load tkdnd library."
+    - The PyInstaller hook now bundles only the binaries for the build's CPU
+      and Tcl/Tk version instead of every architecture for the OS. macOS
+      builds still include both Intel and Apple Silicon binaries so
+      universal2 builds keep working.
+    - On platforms without TkDND binaries, the PyInstaller hook now logs a
+      warning instead of failing the build.
+
 0.6.4
     - Updated TkDND binaries to 2.10.3 for linux-x64(-tcl9),
       linux-arm64(-tcl9), win-x64(-tcl9), win-x86(-tcl9), win-arm64, and
